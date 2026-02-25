@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const key = "AIzaSyAAAc5MboaBXYWpD0mkYIPQfRNUDlGP43A"
   const [search, setSearch] = useState("")
-  const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
   const [books, setBooks] = useState([])
 
   const handleSearch = (event) => {
@@ -13,20 +12,20 @@ export default function Home() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    useEffect(() => {
-      const response = fetch(url)
-      .then(response => response.json())
-      .then(data => setBooks(data.items))
-    },[])
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
+    const response = fetch(url)
+    .then(response => response.json())
+    .then(data => setBooks(data.items))
+    .catch(error => {
+      console.error('Error fetch data: ', error)
+    })
   }
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <label>
-          Enter search terms:
-          <input type="text" value={search} onChange={handleSearch}/>
-        </label>
+        <label htmlFor="searchInput">Search Books: </label>
+          <input type="text" value={search} onChange={handleSearch} placeholder="Enter a title or author..."/>
         <button type="submit">Search</button>
       </form>
       <div>{books.map(book => (
