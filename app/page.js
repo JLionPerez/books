@@ -22,20 +22,29 @@ export default function Home() {
   }
 
   return (
-    <>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="searchInput">Search Books: </label>
-          <input type="text" value={search} onChange={handleSearch} placeholder="Enter a title or author..."/>
-        <button type="submit">Search</button>
-      </form>
-      <div>{books.map(book => (
-        <div key={book.id}>
-          <img src={book.volumeInfo.imageLinks.thumbnail}></img>
-          <p id="name">{book.volumeInfo.title} by {book.volumeInfo.authors}</p>
-          <p id="text">{book.volumeInfo.description}</p>
+      <div className="container">
+        <div className="header">
+          <div className="hero">
+            <h1>Book Search</h1>
+            <p>Use the Google Books API to search through their libraries.</p>
+            <p>*Currently work in progress.*</p>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <input type="text" value={search} onChange={handleSearch} placeholder=""/>
+            <button type="submit">Search Books</button>
+            <img className="search_logo" src="/poweredby.png"></img>
+          </form>
         </div>
-      ))}</div>
-    </>
+        <div className="library">{books.map(book => (
+          <div className="book" key={book.id}>
+            <img className="thumbnail" src={book.volumeInfo.imageLinks.thumbnail}></img>
+            <div className="description">
+              <h3 id="name">{book.volumeInfo.title} by {book.volumeInfo.authors}</h3>
+              <p id="text">{book.volumeInfo.description}</p>
+            </div>
+          </div>
+        ))}</div>
+      </div>
   );
 }
 
