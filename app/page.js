@@ -1,66 +1,50 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const key = "AIzaSyAAAc5MboaBXYWpD0mkYIPQfRNUDlGP43A"
+  const [search, setSearch] = useState("")
+  const [books, setBooks] = useState([])
+
+  const handleSearch = (event) => {
+    setSearch(event.target.value)
+  }
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
+    const response = fetch(url)
+    .then(response => response.json())
+    .then(data => setBooks(data.items))
+    .catch(error => {
+      console.error('Error fetch data: ', error)
+    })
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.js file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+      <div className="container">
+        <div className="header">
+          <div className="hero">
+            <h1>Book Search</h1>
+            <p>Use the Google Books API to search through their libraries.</p>
+            <p>*Currently work in progress.*</p>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <input type="text" value={search} onChange={handleSearch} placeholder=""/>
+            <button type="submit">Search Books</button>
+            <img className="search_logo" src="/poweredby.png"></img>
+          </form>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <div className="library">{books.map(book => (
+          <div className="book" key={book.id}>
+            <img className="thumbnail" src={book.volumeInfo.imageLinks.thumbnail}></img>
+            <div className="description">
+              <h3 id="name">{book.volumeInfo.title} by {book.volumeInfo.authors}</h3>
+              <p id="text">{book.volumeInfo.description}</p>
+            </div>
+          </div>
+        ))}</div>
+      </div>
   );
 }
+
