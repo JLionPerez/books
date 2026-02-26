@@ -1,8 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function Home() {
-  const key = "AIzaSyAAAc5MboaBXYWpD0mkYIPQfRNUDlGP43A"
+  const key = process.env.NEXT_PUBLIC_API_KEY;
   const [search, setSearch] = useState("")
   const [books, setBooks] = useState([])
 
