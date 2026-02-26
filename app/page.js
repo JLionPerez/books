@@ -37,7 +37,7 @@ export default function Home() {
         </div>
         <div className="library">{books.map(book => (
           <div className="book" key={book.id}>
-            <img className="thumbnail" src={book.volumeInfo.imageLinks.thumbnail}></img>
+            <img className="thumbnail" src={book.volumeInfo.imageLinks?.thumbnail}></img>
             <div className="description">
               <h3 id="name">{book.volumeInfo.title} by {book.volumeInfo.authors}</h3>
               <p id="text">{book.volumeInfo.description}</p>
