@@ -5,6 +5,7 @@ export default function Home() {
   const key = process.env.NEXT_PUBLIC_API_KEY;
   const [search, setSearch] = useState("")
   const [books, setBooks] = useState([])
+  const inputMessage = ""
 
   const handleSearch = (event) => {
     setSearch(event.target.value)
@@ -12,13 +13,17 @@ export default function Home() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
-    const response = fetch(url)
-    .then(response => response.json())
-    .then(data => setBooks(data.items))
-    .catch(error => {
-      console.error('Error fetch data: ', error)
-    })
+    if(!search) {
+      alert('Please enter a search term.')
+    } else {
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
+      fetch(url)
+      .then(response => response.json())
+      .then(data => setBooks(data.items))
+      .catch(error => {
+        console.error('Error fetch data: ', error)
+      })
+    }
   }
 
   return (
