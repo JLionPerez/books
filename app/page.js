@@ -19,7 +19,14 @@ export default function Home() {
       const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
       fetch(url)
       .then(response => response.json())
-      .then(data => setBooks(data.items))
+      .then(data => {
+        if (!data.totalItems) {
+          alert('That book does not exist.')
+        } else {
+          console.log("totalItems: ", data.totalItems)
+          setBooks(data.items)
+        }
+      })
       .catch(error => {
         console.error('Error fetch data: ', error)
       })
@@ -32,7 +39,6 @@ export default function Home() {
           <div className="hero">
             <h1>Book Search</h1>
             <p>Use the Google Books API to search through their libraries.</p>
-            <p>*Currently work in progress.*</p>
           </div>
           <form onSubmit={handleSubmit}>
             <input type="text" value={search} onChange={handleSearch} placeholder=""/>
