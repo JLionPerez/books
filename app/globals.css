@@ -57,6 +57,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex-basis: 100%
 }
 
 .book {
