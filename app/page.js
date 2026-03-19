@@ -5,7 +5,10 @@ export default function Home() {
   const key = process.env.NEXT_PUBLIC_API_KEY;
   const [search, setSearch] = useState("")
   const [books, setBooks] = useState([])
-  const inputMessage = ""
+  // const inputMessage = ""
+  const startIndex = 0 
+  const maxResults = 20
+
 
   const handleSearch = (event) => {
     setSearch(event.target.value)
@@ -16,7 +19,7 @@ export default function Home() {
     if(!search) {
       alert('Please enter a search term.')
     } else {
-      const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&langRestrict=en&printType=books&key=${key}`
+      const url = `https://www.googleapis.com/books/v1/volumes?q=${search}&startIndex=2&maxResults=40&langRestrict=en&printType=books&key=${key}`
       fetch(url)
       .then(response => response.json())
       .then(data => {
@@ -24,6 +27,7 @@ export default function Home() {
           alert('That book does not exist.')
         } else {
           console.log("totalItems: ", data.totalItems)
+          // console.log("maxResults: ", maxResults)
           setBooks(data.items)
         }
       })
