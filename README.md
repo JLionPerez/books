@@ -17,6 +17,9 @@ A React application that allows users to search for books using the Google Books
 - JavaScript
 - HTML/CSS
 - External API integration
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
 
 ## :gear: How to Run Locally
 
@@ -44,7 +47,7 @@ A React application that allows users to search for books using the Google Books
 
 ## :rocket: Future Improvements
 
-- Improve UI/UX design
-- Add pagination
-- Implement a database for saving favorite books
-- Add backend for account pages
+[ ] Improve UI/UX design
+[ ] Add pagination
+[ ] *WIP:* Implement a database for saving favorite books
+[ ] Add backend for account pages
