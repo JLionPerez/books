@@ -6,6 +6,7 @@ class Favorite(Base):
     __tablename__ = "favorite"
 
     id = Column(Integer(), primary_key = True)
+    google_books_id = Column(String())
     title = Column(String())
     author = Column(String())
     thumbnail = Column(String()) # url, points to img, not stored due to complexity and immense storage usage
