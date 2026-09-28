@@ -40,3 +40,12 @@ async def get_favorite_book(id: int):
     favorites_query = db.query(Favorite).filter(Favorite.id==id)
     favorite = favorites_query.first()
     return favorite
+
+@app.delete("/favorites/{id}")
+async def delete_favorite_book(id: int):
+    db = Session()
+    favorites_query = db.query(Favorite).filter(Favorite.id==id)
+    favorite = favorites_query.first()
+    db.delete(favorite)
+    db.commit()
+    return {"Deleted ": favorite.title}
