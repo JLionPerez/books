@@ -15,7 +15,7 @@ class Book(BaseModel):
 app = FastAPI()
 
 @app.post("/favorites")
-async def create_item(book: Book):
+async def create_favorite(book: Book):
     db = Session()
     new_favorite = Favorite(
         google_books_id=book.google_books_id, 
@@ -27,3 +27,16 @@ async def create_item(book: Book):
     db.add(new_favorite)
     db.commit()
     return new_favorite
+
+@app.get("/favorites")
+async def get_all_favorites():
+    db = Session()
+    favorites_query = db.query(Favorite)
+    return favorites_query.all()
+
+@app.get("/favorites/{id}")
+async def get_favorite_book(id: int):
+    db = Session()
+    favorites_query = db.query(Favorite).filter(Favorite.id==id)
+    favorite = favorites_query.first()
+    return favorite
