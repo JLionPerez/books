@@ -1,11 +1,15 @@
 from fastapi import FastAPI
 from database import engine, Session
-from models import Base, Favorite
+from models import Base, BookModel, BookList
 from pydantic import BaseModel
 
 Base.metadata.create_all(engine)
 
+class List(BaseModel):
+    name: str
+
 class Book(BaseModel):
+    list_id: int
     google_books_id: str
     title: str
     author: str
@@ -14,38 +18,46 @@ class Book(BaseModel):
     
 app = FastAPI()
 
-@app.post("/favorites")
-async def create_favorite(book: Book):
+# CRUD List
+
+
+
+
+# CRUD Book
+
+@app.post("/books")
+async def create_book_in_list(book: Book):
     db = Session()
-    new_favorite = Favorite(
+    new_book = BookModel(
+        list_id=book.list_id,
         google_books_id=book.google_books_id, 
         title=book.title,
         author=book.author,
         thumbnail=book.thumbnail,
         description=book.description
     )
-    db.add(new_favorite)
+    db.add(new_book)
     db.commit()
-    return new_favorite
+    return new_book
 
-@app.get("/favorites")
-async def get_all_favorites():
+@app.get("/books")
+async def get_all_books_in_list():
     db = Session()
-    favorites_query = db.query(Favorite)
-    return favorites_query.all()
+    books_query = db.query(BookModel)
+    return books_query.all()
 
-@app.get("/favorites/{id}")
-async def get_favorite_book(id: int):
+@app.get("/books/{id}")
+async def get_book_in_list(id: int):
     db = Session()
-    favorites_query = db.query(Favorite).filter(Favorite.id==id)
-    favorite = favorites_query.first()
-    return favorite
+    books_query = db.query(BookModel).filter(BookModel.id==id)
+    book = books_query.first()
+    return book
 
-@app.delete("/favorites/{id}")
-async def delete_favorite_book(id: int):
+@app.delete("/books/{id}")
+async def delete_book_in_list(id: int):
     db = Session()
-    favorites_query = db.query(Favorite).filter(Favorite.id==id)
-    favorite = favorites_query.first()
-    db.delete(favorite)
+    books_query = db.query(BookModel).filter(BookModel.id==id)
+    book = books_query.first()
+    db.delete(book)
     db.commit()
-    return {"Deleted ": favorite.title}
+    return {"Deleted ": book.title}
