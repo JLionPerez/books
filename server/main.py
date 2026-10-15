@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from database import engine, Session
 from models import Base, BookModel, BookList
 from pydantic import BaseModel
@@ -53,11 +53,21 @@ async def get_book_in_list(id: int):
     book = books_query.first()
     return book
 
-@app.delete("/books/{id}")
-async def delete_book_in_list(id: int):
+@app.delete("/lists/{list_id}/books/{id}")
+async def delete_book_in_list(list_id: int, book_id: int):
     db = Session()
-    books_query = db.query(BookModel).filter(BookModel.id==id)
-    book = books_query.first()
-    db.delete(book)
+    book_list = db.query(BookList).filter(BookList.id==list_id).first()
+    book = db.query(BookModel).filter(BookModel.id == book_id).first()
+    
+    if book_list is None:
+        raise HTTPException(status_code=404, detail="List not found")
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+    
+    book_list.books.remove(book)
+
+    if not book.lists:
+        db.delete(book)
+    
     db.commit()
     return {"Deleted ": book.title}
