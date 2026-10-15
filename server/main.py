@@ -50,14 +50,20 @@ async def get_all_books_in_list(list_id: int):
     
     return book_list.books
 
-@app.get("/books/{id}")
-async def get_book_in_list(id: int):
+@app.get("/lists/{list_id}/books/{book_id}")
+async def get_book_in_list(list_id: int, book_id: int):
     db = Session()
-    books_query = db.query(BookModel).filter(BookModel.id==id)
-    book = books_query.first()
+    book = db.query(BookModel).filter(
+        BookModel.id == book_id,
+        BookModel.lists.any(BookList.id == list_id)
+    ).first()
+
+    if book is None:
+        raise HTTPException(status_code=404, detail="Book not found")
+
     return book
 
-@app.delete("/lists/{list_id}/books/{id}")
+@app.delete("/lists/{list_id}/books/{book_id}")
 async def delete_book_in_list(list_id: int, book_id: int):
     db = Session()
     book_list = db.query(BookList).filter(BookList.id==list_id).first()
