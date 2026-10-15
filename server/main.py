@@ -25,18 +25,27 @@ app = FastAPI()
 
 # CRUD Book
 
-@app.post("/books")
-async def create_book_in_list(book: Book):
+@app.post("/lists/{list_id}/books")
+async def create_book_in_list(list_id: int, book: Book):
     db = Session()
-    new_book = BookModel(
-        list_id=book.list_id,
-        google_books_id=book.google_books_id, 
-        title=book.title,
-        author=book.author,
-        thumbnail=book.thumbnail,
-        description=book.description
-    )
-    db.add(new_book)
+    book_list = db.query(BookList).filter(BookList.id == list_id).first()
+    if book_list is None:
+        raise HTTPException(status_code=404, detail="List not found")
+    
+    new_book = db.query(BookModel).filter(BookModel.google_books_id == book.google_books_id).first()
+    if new_book is None:
+        new_book = BookModel(
+                google_books_id=book.google_books_id, 
+                title=book.title,
+                author=book.author,
+                thumbnail=book.thumbnail,
+                description=book.description
+            )
+        db.add(new_book)
+
+    if new_book not in book_list.books:
+        book_list.books.append(new_book)
+    
     db.commit()
     return new_book
 
