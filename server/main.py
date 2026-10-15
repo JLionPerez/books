@@ -40,11 +40,15 @@ async def create_book_in_list(book: Book):
     db.commit()
     return new_book
 
-@app.get("/books")
-async def get_all_books_in_list():
+@app.get("/lists/{list_id}/books")
+async def get_all_books_in_list(list_id: int):
     db = Session()
-    books_query = db.query(BookModel)
-    return books_query.all()
+    book_list = db.query(BookList).filter(BookList.id == list_id).first()
+    
+    if book_list is None:
+        raise HTTPException(status_code=404, detail="List not found")
+    
+    return book_list.books
 
 @app.get("/books/{id}")
 async def get_book_in_list(id: int):
