@@ -24,6 +24,9 @@ app = FastAPI()
 async def create_list(list: List):
     db = Session()
     new_list = db.query(BookList).filter(BookList.name == list.name).first()
+
+    if new_list is not None:
+        raise HTTPException(status_code=400, detail="List already exists")
     
     if new_list is None:
         new_list = BookList(
@@ -44,6 +47,10 @@ async def create_book_in_list(list_id: int, book: Book):
         raise HTTPException(status_code=404, detail="List not found")
     
     new_book = db.query(BookModel).filter(BookModel.google_books_id == book.google_books_id).first()
+
+    if new_book is not None:
+        raise HTTPException(status_code=400, detail="Book already in list")
+
     if new_book is None:
         new_book = BookModel(
             google_books_id=book.google_books_id, 
