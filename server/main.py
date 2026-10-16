@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from database import engine, Session
 from models import Base, BookModel, BookList
 from pydantic import BaseModel
@@ -9,7 +9,6 @@ class List(BaseModel):
     name: str
 
 class Book(BaseModel):
-    list_id: int
     google_books_id: str
     title: str
     author: str
@@ -18,21 +17,24 @@ class Book(BaseModel):
     
 app = FastAPI()
 
+def get_db():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # CRUD List
 
 @app.post("/lists")
-async def create_list(list: List):
-    db = Session()
-    new_list = db.query(BookList).filter(BookList.name == list.name).first()
+async def create_list(l: List, db = Depends(get_db)):
+    new_list = db.query(BookList).filter(BookList.name == l.name).first()
 
     if new_list is not None:
         raise HTTPException(status_code=400, detail="List already exists")
     
-    if new_list is None:
-        new_list = BookList(
-            name=list.name
-        )
-        db.add(new_list)
+    new_list = BookList(name=l.name)
+    db.add(new_list)
 
     db.commit()
     return new_list
@@ -40,16 +42,12 @@ async def create_list(list: List):
 # CRUD Book
 
 @app.post("/lists/{list_id}/books")
-async def create_book_in_list(list_id: int, book: Book):
-    db = Session()
+async def create_book_in_list(list_id: int, book: Book, db = Depends(get_db)):
     book_list = db.query(BookList).filter(BookList.id == list_id).first()
     if book_list is None:
         raise HTTPException(status_code=404, detail="List not found")
     
     new_book = db.query(BookModel).filter(BookModel.google_books_id == book.google_books_id).first()
-
-    if new_book is not None:
-        raise HTTPException(status_code=400, detail="Book already in list")
 
     if new_book is None:
         new_book = BookModel(
@@ -63,13 +61,14 @@ async def create_book_in_list(list_id: int, book: Book):
 
     if new_book not in book_list.books:
         book_list.books.append(new_book)
+    else:
+        raise HTTPException(status_code=400, detail="Book already in list")
     
     db.commit()
     return new_book
 
 @app.get("/lists/{list_id}/books")
-async def get_all_books_in_list(list_id: int):
-    db = Session()
+async def get_all_books_in_list(list_id: int, db = Depends(get_db)):
     book_list = db.query(BookList).filter(BookList.id == list_id).first()
     
     if book_list is None:
@@ -78,8 +77,7 @@ async def get_all_books_in_list(list_id: int):
     return book_list.books
 
 @app.get("/lists/{list_id}/books/{book_id}")
-async def get_book_in_list(list_id: int, book_id: int):
-    db = Session()
+async def get_book_in_list(list_id: int, book_id: int, db = Depends(get_db)):
     book = db.query(BookModel).filter(
         BookModel.id == book_id,
         BookModel.lists.any(BookList.id == list_id)
@@ -90,16 +88,20 @@ async def get_book_in_list(list_id: int, book_id: int):
 
     return book
 
+# @app.put("/lists/{list_id}/books/")
+
 @app.delete("/lists/{list_id}/books/{book_id}")
-async def delete_book_in_list(list_id: int, book_id: int):
-    db = Session()
+async def delete_book_in_list(list_id: int, book_id: int, db = Depends(get_db)):
     book_list = db.query(BookList).filter(BookList.id==list_id).first()
-    book = db.query(BookModel).filter(BookModel.id == book_id).first()
+    book = db.query(BookModel).filter(
+        BookModel.id == book_id,
+        BookModel.lists.any(BookList.id == list_id)
+    ).first()
     
     if book_list is None:
         raise HTTPException(status_code=404, detail="List not found")
-    if book is None:
-        raise HTTPException(status_code=404, detail="Book not found")
+    if book not in book_list.books:
+        raise HTTPException(status_code=404, detail="Book not in this list")
     
     book_list.books.remove(book)
 
