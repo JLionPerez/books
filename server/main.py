@@ -20,8 +20,19 @@ app = FastAPI()
 
 # CRUD List
 
+@app.post("/lists")
+async def create_list(list: List):
+    db = Session()
+    new_list = db.query(BookList).filter(BookList.name == list.name).first()
+    
+    if new_list is None:
+        new_list = BookList(
+            name=list.name
+        )
+        db.add(new_list)
 
-
+    db.commit()
+    return new_list
 
 # CRUD Book
 
@@ -35,12 +46,12 @@ async def create_book_in_list(list_id: int, book: Book):
     new_book = db.query(BookModel).filter(BookModel.google_books_id == book.google_books_id).first()
     if new_book is None:
         new_book = BookModel(
-                google_books_id=book.google_books_id, 
-                title=book.title,
-                author=book.author,
-                thumbnail=book.thumbnail,
-                description=book.description
-            )
+            google_books_id=book.google_books_id, 
+            title=book.title,
+            author=book.author,
+            thumbnail=book.thumbnail,
+            description=book.description
+        )
         db.add(new_book)
 
     if new_book not in book_list.books:
